@@ -10,6 +10,7 @@
   "dependencies": {
     "@svgdotjs/svg.js": "^3.0.16",
     "core-js": "^3.6.5",
+    "eslint-config-airbnb": "^18.2.0",
     "vue": "^2.6.11"
   },
   "devDependencies": {
@@ -18,9 +19,10 @@
     "@vue/cli-service": "~4.4.0",
     "@vue/eslint-config-airbnb": "^5.0.2",
     "babel-eslint": "^10.1.0",
-    "eslint": "^6.7.2",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-vue": "^6.2.2",
+    "eslint-plugin-vue": "^7.0.0-alpha.8",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
