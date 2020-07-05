@@ -78,9 +78,11 @@ export default {
   },
   methods: {
     createSVGSquareGrid(xCount, yCount) {
-      for (let x = 0; x <= xCount; x += 1) {
+      const correctedXCount = xCount * this.gridSize;
+      const correctedYCount = yCount * this.gridSize;
+      for (let x = 0; x <= correctedXCount; x += 1) {
         const originX = [x * this.gridSize, 0];
-        const endX = [x * this.gridSize, yCount * this.gridSize];
+        const endX = [x * this.gridSize, correctedYCount * this.gridSize];
         const firstLine = this.svgCanvas.line(
           originX[0],
           originX[1],
@@ -89,9 +91,9 @@ export default {
         );
         firstLine.stroke({ color: 'black', width: 2, linecap: 'round' });
       }
-      for (let y = 0; y <= yCount; y += 1) {
+      for (let y = 0; y <= correctedYCount; y += 1) {
         const origin = [0, y * this.gridSize];
-        const end = [xCount * this.gridSize, y * this.gridSize];
+        const end = [correctedXCount * this.gridSize, y * this.gridSize];
         const firstLine = this.svgCanvas.line(
           origin[0],
           origin[1],
@@ -208,7 +210,7 @@ export default {
     this.svgCanvas = SVG()
       .addTo('.svg-container')
       .size(this.width, this.height);
-    this.createSVGSquareGrid(40, 40);
+    this.createSVGSquareGrid(17, 17);
     this.hexGrid = this.drawHexGrid(5, 5);
   },
 };

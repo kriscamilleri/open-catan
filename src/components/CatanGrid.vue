@@ -1,6 +1,6 @@
 <template>
     <div>
-        <hex-grid :gridSize="25" :width="500" :height="500" :render-tiles="catanTiles"></hex-grid>
+        <hex-grid :gridSize="25" :width="400" :height="500" :render-tiles="catanTiles"></hex-grid>
     </div>
 </template>
 
