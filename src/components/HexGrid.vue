@@ -11,6 +11,27 @@ export default {
     gridSize: Number,
     width: Number,
     height: Number,
+    renderTiles: Array,
+    lineColor: {
+      default: 'green',
+      type: String,
+    },
+    hexStrokeColor: {
+      default: 'red',
+      type: String,
+    },
+    hexFillColor: {
+      default: 'blue',
+      type: String,
+    },
+    centerStrokeColor: {
+      default: 'orange',
+      type: String,
+    },
+    centerFillColor: {
+      default: 'purple',
+      type: String,
+    },
   },
   data() {
     return {
@@ -66,7 +87,7 @@ export default {
           endX[0],
           endX[1],
         );
-        firstLine.stroke({ color: 'red', width: 2, linecap: 'round' });
+        firstLine.stroke({ color: 'black', width: 2, linecap: 'round' });
       }
       for (let y = 0; y <= yCount; y += 1) {
         const origin = [0, y * this.gridSize];
@@ -77,7 +98,7 @@ export default {
           end[0],
           end[1],
         );
-        firstLine.stroke({ color: 'red', width: 2, linecap: 'round' });
+        firstLine.stroke({ color: 'black', width: 2, linecap: 'round' });
       }
     },
     drawHexTile(xOrigin, yOrigin, strokeColor, fillColor, clickColor) {
@@ -140,11 +161,11 @@ export default {
       const innerPolygon = this.drawHexTile(
         xOrigin,
         yOrigin,
-        'red',
-        'green',
-        'blue',
+        this.hexStrokeColor,
+        this.hexFillColor,
+        'transparent',
       );
-      const lines = this.generateLines(xOrigin, yOrigin, 'orange', 'violet');
+      const lines = this.generateLines(xOrigin, yOrigin, this.lineColor, this.hexFillColor);
 
       const centerDot = this.drawCenterDot(xOrigin, yOrigin, 'red', 'green');
       const hexLabel = label.toString() || '';
@@ -168,11 +189,13 @@ export default {
       let counter = 1;
       for (let i = 0; i < xHexCount; i += 1) {
         for (let j = 0; j < yHexCount; j += 1) {
-          const alternatingoffset = i % 2 === 0 ? 2 : 4;
-          const yOffset = j * 4 + alternatingoffset;
-          const label = counter.toString();
-          const hexagon = this.drawHex(xOffset, yOffset, label);
-          hexagonGrid.push(hexagon);
+          if (this.renderTiles.includes(counter)) {
+            const alternatingoffset = i % 2 === 0 ? 2 : 4;
+            const yOffset = j * 4 + alternatingoffset;
+            const label = counter.toString();
+            const hexagon = this.drawHex(xOffset, yOffset, label);
+            hexagonGrid.push(hexagon);
+          }
           counter += 1;
         }
         xOffset += 3;

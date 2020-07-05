@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-    <hex-grid :gridSize="25" :width="500" :height="500"></hex-grid>
+    <catan-grid></catan-grid>
   </div>
 </template>
 
 <script>
-import HexGrid from './components/HexGrid.vue';
+import CatanGrid from './components/CatanGrid.vue';
 
 export default {
   name: 'App',
   components: {
-    HexGrid,
+    CatanGrid,
   },
 };
 </script>
