@@ -1,26 +1,27 @@
 <template>
   <g>
-    <g v-for="hex in hexGrid" :key="hex.id" :data-hex-index="hex.id">
-      <line
-        v-for="line in hex.lines"
-        :key="line.id"
-        :x1="line.x1"
-        :y1="line.y1"
-        :x2="line.x2"
-        :y2="line.y2"
-        :stroke="hexStrokeColor"
-        stroke-width="2"
-        class="hex-outline"
-      />
-      <polygon :points="hex.polygonPath" :fill="hexFillColor" />
-      <text :x="hex.origin.x" :y="hex.origin.y" fill="white">{{hex.id}}</text>
-    </g>
+    <hex-tile
+      v-for="hex in hexGrid"
+      ref="hex"
+      :key="hex.label"
+      :x-offset="hex.xOffset"
+      :y-offset="hex.yOffset"
+      :label="hex.label"
+      :grid-size="gridSize"
+      @hex-clicked="hexClick"
+      @path-clicked="pathClick"
+    ></hex-tile>
   </g>
 </template>
 
 <script>
+import HexTile from "./HexTile.vue";
+
 export default {
-  name: 'HexGrid',
+  name: "HexGrid",
+  components: {
+    HexTile
+  },
   props: {
     gridSize: Number,
     width: Number,
@@ -28,132 +29,34 @@ export default {
     renderTiles: Array,
     xHexCount: {
       default: 5,
-      type: Number,
+      type: Number
     },
     yHexCount: {
       default: 5,
-      type: Number,
+      type: Number
     },
     lineColor: {
-      default: 'green',
-      type: String,
+      default: "green",
+      type: String
     },
     hexStrokeColor: {
-      default: 'red',
-      type: String,
+      default: "red",
+      type: String
     },
     hexFillColor: {
-      default: 'blue',
-      type: String,
-    },
-    centerStrokeColor: {
-      default: 'orange',
-      type: String,
-    },
-    centerFillColor: {
-      default: 'purple',
-      type: String,
-    },
+      default: "blue",
+      type: String
+    }
   },
   data() {
     return {
       hexGrid: [],
-      offsets: [
-        {
-          label: 'top-start',
-          x: -1,
-          y: -2,
-        },
-        {
-          label: 'top-right',
-          x: 1,
-          y: -2,
-        },
-        {
-          label: 'bottom-right',
-          x: 2,
-          y: 0,
-        },
-        {
-          label: 'bottom',
-          x: 1,
-          y: 2,
-        },
-        {
-          label: 'bottom-left',
-          x: -1,
-          y: 2,
-        },
-        {
-          label: 'top-left',
-          x: -2,
-          y: 0,
-        },
-        {
-          label: 'top-end',
-          x: -1,
-          y: -2,
-        },
-      ],
+      hexes: [],
+      neighboursMap: [],
+      hexPairList: []
     };
   },
   methods: {
-    generateHexPolygon(xOrigin, yOrigin) {
-      let polygonPath = '';
-      for (let i = 0; i < 6; i += 1) {
-        const xPosition = (this.offsets[i].x * 0.8 + xOrigin) * this.gridSize;
-        const yPosition = (this.offsets[i].y * 0.8 + yOrigin) * this.gridSize;
-        polygonPath += `${xPosition}, ${yPosition} `;
-      }
-      polygonPath.trimRight();
-
-      return polygonPath;
-    },
-    generateHexPath(xOrigin, yOrigin, strokeColor, fillColor) {
-      const paths = [];
-      for (let i = 0; i < 6; i += 1) {
-        const xLastPosition = (this.offsets[i].x + xOrigin) * this.gridSize;
-        const yLastPosition = (this.offsets[i].y + yOrigin) * this.gridSize;
-        const xPosition = (this.offsets[i + 1].x + xOrigin) * this.gridSize;
-        const yPosition = (this.offsets[i + 1].y + yOrigin) * this.gridSize;
-
-        const path = {
-          x1: xPosition,
-          y1: yPosition,
-          x2: xLastPosition,
-          y2: yLastPosition,
-          id: i,
-          strokeColor,
-          fillColor,
-        };
-        paths.push(path);
-      }
-      return paths;
-    },
-    drawHex(xOrigin, yOrigin, label) {
-      const polygonPath = this.generateHexPolygon(
-        xOrigin,
-        yOrigin,
-        this.hexStrokeColor,
-        this.hexFillColor,
-        'transparent',
-      );
-
-      const lines = this.generateHexPath(
-        xOrigin,
-        yOrigin,
-        this.lineColor,
-        this.hexFillColor,
-        label,
-      );
-      const hexagon = {
-        id: label,
-        lines,
-        polygonPath,
-        origin: { x: xOrigin * this.gridSize, y: yOrigin * this.gridSize },
-      };
-      return hexagon;
-    },
     drawHexGrid(xHexCount, yHexCount) {
       const hexagonGrid = [];
       let xOffset = 2;
@@ -164,8 +67,8 @@ export default {
             const alternatingoffset = i % 2 === 0 ? 2 : 4;
             const yOffset = j * 4 + alternatingoffset;
             const label = counter.toString();
-            const hexagon = this.drawHex(xOffset, yOffset, label);
-            hexagonGrid.push(hexagon);
+            const hexagonInitiator = { xOffset, yOffset, label };
+            hexagonGrid.push(hexagonInitiator);
           }
           counter += 1;
         }
@@ -173,9 +76,56 @@ export default {
       }
       return hexagonGrid;
     },
+    hexClick(hexTile) {
+      this.$emit("hex-clicked", hexTile);
+    },
+    pathClick(hexTile) {
+      const modifiedHexTile = hexTile;
+      const overlapList = [];
+      for (let i = 0; i < this.hexPairList.length; i += 1) {
+        //TODO: Continue here - want to be able to emit neighbouring tiles
+        //Current issue is i need to understand relationship between diagonal values.
+        //x1 will never equals x1 of some other value. it may be y2 or some other value.
+        if (
+          this.hexPairList[i].path.x1 === Number(hexTile.path.x1.value) &&
+          this.hexPairList[i].path.x2 === Number(hexTile.path.x2) &&
+          this.hexPairList[i].path.y1 === Number(hexTile.path.y1) &&
+          this.hexPairList[i].path.y2 === Number(hexTile.path.y2)
+        ) {
+          overlapList.push(this.hexPairList[i].id);
+          console.log(overlapList);
+        }
+      }
+      this.$emit("path-clicked", modifiedHexTile);
+    }
   },
   mounted() {
     this.hexGrid = this.drawHexGrid(this.xHexCount, this.yHexCount);
-  },
+    this.$nextTick(function() {
+      const hexByPath = this.$refs.hex.map(hex => {
+        const id = Number(hex.hex.id);
+        const paths = hex.getPaths();
+        return { id, paths };
+      });
+      //populate store of all paths
+      for (let i = 0; i < hexByPath.length; i += 1) {
+        for (let j = 0; j < 6; j += 1) {
+          const localPaths = hexByPath[i].paths[j];
+          const mapped = {
+            x1: localPaths.x1,
+            x2: localPaths.x2,
+            y1: localPaths.y1,
+            y2: localPaths.y2
+          };
+          const item = {
+            id: hexByPath[i].id,
+            path: mapped
+          };
+
+          this.hexPairList.push(item);
+        }
+      }
+    });
+  }
 };
 </script>

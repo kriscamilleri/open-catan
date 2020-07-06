@@ -14,6 +14,8 @@
       :render-tiles="catanTiles"
       :xHexCount="5"
       :yHexCount="5"
+      @hex-clicked="hexClick"
+      @path-clicked="pathClick"
     />
   </svg>
 </template>
@@ -62,6 +64,16 @@ export default {
         24,
       ],
     };
+  },
+  methods: {
+    hexClick(event) {
+      event.hex.setPolygonFill('red');
+      console.log(event.hex);
+    },
+    pathClick(event) {
+      event.hex.setPathColor('green', event.path);
+      console.log(event.hex);
+    },
   },
 };
 </script>
