@@ -8,7 +8,7 @@
       :x2="path.x2"
       :y2="path.y2"
       :stroke="path.strokeColor"
-      stroke-width="5"
+      stroke-width="10"
       class="hex-outline"
       v-on:click="clickPath"
     />

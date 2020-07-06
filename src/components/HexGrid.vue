@@ -15,12 +15,12 @@
 </template>
 
 <script>
-import HexTile from "./HexTile.vue";
+import HexTile from './HexTile.vue';
 
 export default {
-  name: "HexGrid",
+  name: 'HexGrid',
   components: {
-    HexTile
+    HexTile,
   },
   props: {
     gridSize: Number,
@@ -29,31 +29,19 @@ export default {
     renderTiles: Array,
     xHexCount: {
       default: 5,
-      type: Number
+      type: Number,
     },
     yHexCount: {
       default: 5,
-      type: Number
+      type: Number,
     },
-    lineColor: {
-      default: "green",
-      type: String
-    },
-    hexStrokeColor: {
-      default: "red",
-      type: String
-    },
-    hexFillColor: {
-      default: "blue",
-      type: String
-    }
   },
   data() {
     return {
       hexGrid: [],
       hexes: [],
       neighboursMap: [],
-      hexPairList: []
+      hexPairList: [],
     };
   },
   methods: {
@@ -77,37 +65,39 @@ export default {
       return hexagonGrid;
     },
     hexClick(hexTile) {
-      this.$emit("hex-clicked", hexTile);
+      this.$emit('hex-clicked', hexTile);
     },
     pathClick(hexTile) {
       const modifiedHexTile = hexTile;
-      const overlapList = [];
+      this.findNeighbouringTiles(hexTile);
+      this.$emit('path-clicked', modifiedHexTile);
+    },
+    findNeighbouringTiles(hexTile) {
+      const neighbours = [];
+      neighbours.push(Number(hexTile.hex.label));
       for (let i = 0; i < this.hexPairList.length; i += 1) {
-        //TODO: Continue here - want to be able to emit neighbouring tiles
-        //Current issue is i need to understand relationship between diagonal values.
-        //x1 will never equals x1 of some other value. it may be y2 or some other value.
         if (
-          this.hexPairList[i].path.x1 === Number(hexTile.path.x1.value) &&
-          this.hexPairList[i].path.x2 === Number(hexTile.path.x2) &&
-          this.hexPairList[i].path.y1 === Number(hexTile.path.y1) &&
-          this.hexPairList[i].path.y2 === Number(hexTile.path.y2)
+          this.hexPairList[i].path.x1 === Number(hexTile.path.x2.value)
+          && this.hexPairList[i].path.x2 === Number(hexTile.path.x1.value)
+          && this.hexPairList[i].path.y1 === Number(hexTile.path.y2.value)
+          && this.hexPairList[i].path.y2 === Number(hexTile.path.y1.value)
         ) {
-          overlapList.push(this.hexPairList[i].id);
-          console.log(overlapList);
+          neighbours.push(this.hexPairList[i].id);
+          console.log(neighbours);
         }
       }
-      this.$emit("path-clicked", modifiedHexTile);
-    }
+      return neighbours;
+    },
   },
   mounted() {
     this.hexGrid = this.drawHexGrid(this.xHexCount, this.yHexCount);
-    this.$nextTick(function() {
-      const hexByPath = this.$refs.hex.map(hex => {
+    this.$nextTick(function () {
+      const hexByPath = this.$refs.hex.map((hex) => {
         const id = Number(hex.hex.id);
         const paths = hex.getPaths();
         return { id, paths };
       });
-      //populate store of all paths
+      // populate store of all paths
       for (let i = 0; i < hexByPath.length; i += 1) {
         for (let j = 0; j < 6; j += 1) {
           const localPaths = hexByPath[i].paths[j];
@@ -115,17 +105,17 @@ export default {
             x1: localPaths.x1,
             x2: localPaths.x2,
             y1: localPaths.y1,
-            y2: localPaths.y2
+            y2: localPaths.y2,
           };
           const item = {
             id: hexByPath[i].id,
-            path: mapped
+            path: mapped,
           };
 
           this.hexPairList.push(item);
         }
       }
     });
-  }
+  },
 };
 </script>

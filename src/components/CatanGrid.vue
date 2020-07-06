@@ -68,11 +68,9 @@ export default {
   methods: {
     hexClick(event) {
       event.hex.setPolygonFill('red');
-      console.log(event.hex);
     },
     pathClick(event) {
       event.hex.setPathColor('green', event.path);
-      console.log(event.hex);
     },
   },
 };
