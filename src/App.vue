@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <catan-grid></catan-grid>
+    <catan-grid :width="400" :height="500"></catan-grid>
   </div>
 </template>
 

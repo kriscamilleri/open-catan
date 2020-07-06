@@ -1,19 +1,24 @@
 <template>
-<div>
- <div class="svg-container"></div>
-  <div>
-    <svg>
-      <g v-for="line in lines" :key="line.id">
-          <line :x1="line.x1" :y1="line.y1" :x2="line.x2" :y2="line.y2" stroke="red" />
-      </g>
-    </svg>
-  </div>
-</div>
+  <g>
+    <g v-for="hex in hexGrid" :key="hex.id" :data-hex-index="hex.id">
+      <line
+        v-for="line in hex.lines"
+        :key="line.id"
+        :x1="line.x1"
+        :y1="line.y1"
+        :x2="line.x2"
+        :y2="line.y2"
+        :stroke="hexStrokeColor"
+        stroke-width="2"
+        class="hex-outline"
+      />
+      <polygon :points="hex.polygonPath" :fill="hexFillColor" />
+      <text :x="hex.origin.x" :y="hex.origin.y" fill="white">{{hex.id}}</text>
+    </g>
+  </g>
 </template>
 
 <script>
-import { SVG } from '@svgdotjs/svg.js';
-
 export default {
   name: 'HexGrid',
   props: {
@@ -21,6 +26,14 @@ export default {
     width: Number,
     height: Number,
     renderTiles: Array,
+    xHexCount: {
+      default: 5,
+      type: Number,
+    },
+    yHexCount: {
+      default: 5,
+      type: Number,
+    },
     lineColor: {
       default: 'green',
       type: String,
@@ -44,9 +57,7 @@ export default {
   },
   data() {
     return {
-      svgCanvas: Object,
       hexGrid: [],
-      lines: [],
       offsets: [
         {
           label: 'top-start',
@@ -87,68 +98,26 @@ export default {
     };
   },
   methods: {
-    createSVGSquareGrid(xCount, yCount) {
-      const correctedXCount = xCount * this.gridSize;
-      const correctedYCount = yCount * this.gridSize;
-      for (let x = 0; x <= correctedXCount; x += 1) {
-        const originX = [x * this.gridSize, 0];
-        const endX = [x * this.gridSize, correctedYCount * this.gridSize];
-        const firstLine = this.svgCanvas.line(
-          originX[0],
-          originX[1],
-          endX[0],
-          endX[1],
-        );
-        firstLine.stroke({ color: 'black', width: 2, linecap: 'round' });
-      }
-      for (let y = 0; y <= correctedYCount; y += 1) {
-        const origin = [0, y * this.gridSize];
-        const end = [correctedXCount * this.gridSize, y * this.gridSize];
-        const firstLine = this.svgCanvas.line(
-          origin[0],
-          origin[1],
-          end[0],
-          end[1],
-        );
-        firstLine.stroke({ color: 'black', width: 2, linecap: 'round' });
-      }
-    },
-    drawHexTile(xOrigin, yOrigin, strokeColor, fillColor, clickColor) {
-      const innerPosition = [];
-
+    generateHexPolygon(xOrigin, yOrigin) {
+      let polygonPath = '';
       for (let i = 0; i < 6; i += 1) {
         const xPosition = (this.offsets[i].x * 0.8 + xOrigin) * this.gridSize;
         const yPosition = (this.offsets[i].y * 0.8 + yOrigin) * this.gridSize;
-        innerPosition.push([xPosition, yPosition]);
+        polygonPath += `${xPosition}, ${yPosition} `;
       }
-      const innerPolygon = this.svgCanvas
-        .polygon(innerPosition)
-        .fill({ color: fillColor })
-        .stroke({
-          color: strokeColor,
-          width: 2,
-          linecap: 'round',
-        })
-        .on('click', function () {
-          this.fill({ color: clickColor });
-        });
-      return innerPolygon;
-    },
-    generateLines(xOrigin, yOrigin, strokeColor, fillColor) {
-      const lines = [];
+      polygonPath.trimRight();
 
+      return polygonPath;
+    },
+    generateHexPath(xOrigin, yOrigin, strokeColor, fillColor) {
+      const paths = [];
       for (let i = 0; i < 6; i += 1) {
         const xLastPosition = (this.offsets[i].x + xOrigin) * this.gridSize;
         const yLastPosition = (this.offsets[i].y + yOrigin) * this.gridSize;
         const xPosition = (this.offsets[i + 1].x + xOrigin) * this.gridSize;
         const yPosition = (this.offsets[i + 1].y + yOrigin) * this.gridSize;
-        // const line = this.svgCanvas
-        //   .line(xLastPosition, yLastPosition, xPosition, yPosition)
-        //   .stroke({ width: 9, color: strokeColor })
-        //   .on('click', function () {
-        //     this.stroke({ color: fillColor });
-        //   });
-        const line = {
+
+        const path = {
           x1: xPosition,
           y1: yPosition,
           x2: xLastPosition,
@@ -157,49 +126,33 @@ export default {
           strokeColor,
           fillColor,
         };
-        lines.push(line);
+        paths.push(path);
       }
-      this.lines = lines;
-      return lines;
-    },
-    drawCenterDot(xOrigin, yOrigin, strokeColor, fillColor) {
-      const centerDot = this.svgCanvas
-        .circle((1 / 2) * this.gridSize)
-        .move(
-          xOrigin * this.gridSize - (1 / 4) * this.gridSize,
-          yOrigin * this.gridSize - (1 / 4) * this.gridSize,
-        )
-        .fill(fillColor)
-        .stroke(strokeColor);
-      return centerDot;
+      return paths;
     },
     drawHex(xOrigin, yOrigin, label) {
-      // const innerPolygon = this.drawHexTile(
-      //   xOrigin,
-      //   yOrigin,
-      //   this.hexStrokeColor,
-      //   this.hexFillColor,
-      //   'transparent',
-      // );
-      // const lines =
-      this.generateLines(xOrigin, yOrigin, this.lineColor,
-        this.hexFillColor, label); // remove label from here
+      const polygonPath = this.generateHexPolygon(
+        xOrigin,
+        yOrigin,
+        this.hexStrokeColor,
+        this.hexFillColor,
+        'transparent',
+      );
 
-      // const centerDot = this.drawCenterDot(xOrigin, yOrigin, 'red', 'green');
-      // const hexLabel = label.toString() || '';
-      // const centerText = this.svgCanvas
-      //   .text(hexLabel)
-      //   .move(xOrigin * this.gridSize, yOrigin * this.gridSize);
-
-      // const hexagon = {
-      //   lines,
-      //   center: centerDot,
-      //   origin: [xOrigin, yOrigin],
-      //   label,
-      //   innerPolygon,
-      //   centerText,
-      // };
-      // return hexagon;
+      const lines = this.generateHexPath(
+        xOrigin,
+        yOrigin,
+        this.lineColor,
+        this.hexFillColor,
+        label,
+      );
+      const hexagon = {
+        id: label,
+        lines,
+        polygonPath,
+        origin: { x: xOrigin * this.gridSize, y: yOrigin * this.gridSize },
+      };
+      return hexagon;
     },
     drawHexGrid(xHexCount, yHexCount) {
       const hexagonGrid = [];
@@ -220,14 +173,9 @@ export default {
       }
       return hexagonGrid;
     },
-    tileClicked() {},
   },
   mounted() {
-    this.svgCanvas = SVG()
-      .addTo('.svg-container')
-      .size(this.width, this.height);
-    this.createSVGSquareGrid(17, 17);
-    this.hexGrid = this.drawHexGrid(5, 5);
+    this.hexGrid = this.drawHexGrid(this.xHexCount, this.yHexCount);
   },
 };
 </script>
