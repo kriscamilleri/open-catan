@@ -1,5 +1,14 @@
 <template>
-  <div class="svg-container"></div>
+<div>
+ <div class="svg-container"></div>
+  <div>
+    <svg>
+      <g v-for="line in lines" :key="line.id">
+          <line :x1="line.x1" :y1="line.y1" :x2="line.x2" :y2="line.y2" stroke="red" />
+      </g>
+    </svg>
+  </div>
+</div>
 </template>
 
 <script>
@@ -37,6 +46,7 @@ export default {
     return {
       svgCanvas: Object,
       hexGrid: [],
+      lines: [],
       offsets: [
         {
           label: 'top-start',
@@ -125,27 +135,31 @@ export default {
       return innerPolygon;
     },
     generateLines(xOrigin, yOrigin, strokeColor, fillColor) {
-      const innerPosition = [];
       const lines = [];
 
-      for (let i = 0; i < 6; i += 1) {
-        const xPosition = (this.offsets[i].x * 0.8 + xOrigin) * this.gridSize;
-        const yPosition = (this.offsets[i].y * 0.8 + yOrigin) * this.gridSize;
-        innerPosition.push([xPosition, yPosition]);
-      }
       for (let i = 0; i < 6; i += 1) {
         const xLastPosition = (this.offsets[i].x + xOrigin) * this.gridSize;
         const yLastPosition = (this.offsets[i].y + yOrigin) * this.gridSize;
         const xPosition = (this.offsets[i + 1].x + xOrigin) * this.gridSize;
         const yPosition = (this.offsets[i + 1].y + yOrigin) * this.gridSize;
-        const line = this.svgCanvas
-          .line(xLastPosition, yLastPosition, xPosition, yPosition)
-          .stroke({ width: 9, color: strokeColor })
-          .on('click', function () {
-            this.stroke({ color: fillColor });
-          });
+        // const line = this.svgCanvas
+        //   .line(xLastPosition, yLastPosition, xPosition, yPosition)
+        //   .stroke({ width: 9, color: strokeColor })
+        //   .on('click', function () {
+        //     this.stroke({ color: fillColor });
+        //   });
+        const line = {
+          x1: xPosition,
+          y1: yPosition,
+          x2: xLastPosition,
+          y2: yLastPosition,
+          id: i,
+          strokeColor,
+          fillColor,
+        };
         lines.push(line);
       }
+      this.lines = lines;
       return lines;
     },
     drawCenterDot(xOrigin, yOrigin, strokeColor, fillColor) {
@@ -160,30 +174,32 @@ export default {
       return centerDot;
     },
     drawHex(xOrigin, yOrigin, label) {
-      const innerPolygon = this.drawHexTile(
-        xOrigin,
-        yOrigin,
-        this.hexStrokeColor,
-        this.hexFillColor,
-        'transparent',
-      );
-      const lines = this.generateLines(xOrigin, yOrigin, this.lineColor, this.hexFillColor);
+      // const innerPolygon = this.drawHexTile(
+      //   xOrigin,
+      //   yOrigin,
+      //   this.hexStrokeColor,
+      //   this.hexFillColor,
+      //   'transparent',
+      // );
+      // const lines =
+      this.generateLines(xOrigin, yOrigin, this.lineColor,
+        this.hexFillColor, label); // remove label from here
 
-      const centerDot = this.drawCenterDot(xOrigin, yOrigin, 'red', 'green');
-      const hexLabel = label.toString() || '';
-      const centerText = this.svgCanvas
-        .text(hexLabel)
-        .move(xOrigin * this.gridSize, yOrigin * this.gridSize);
+      // const centerDot = this.drawCenterDot(xOrigin, yOrigin, 'red', 'green');
+      // const hexLabel = label.toString() || '';
+      // const centerText = this.svgCanvas
+      //   .text(hexLabel)
+      //   .move(xOrigin * this.gridSize, yOrigin * this.gridSize);
 
-      const hexagon = {
-        lines,
-        center: centerDot,
-        origin: [xOrigin, yOrigin],
-        label,
-        innerPolygon,
-        centerText,
-      };
-      return hexagon;
+      // const hexagon = {
+      //   lines,
+      //   center: centerDot,
+      //   origin: [xOrigin, yOrigin],
+      //   label,
+      //   innerPolygon,
+      //   centerText,
+      // };
+      // return hexagon;
     },
     drawHexGrid(xHexCount, yHexCount) {
       const hexagonGrid = [];
