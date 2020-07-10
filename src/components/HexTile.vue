@@ -15,6 +15,7 @@
     <polygon
       :points="hex.polygonPath"
       :fill="currentFill"
+      stroke-width="5"
       :stroke="currentStroke"
       v-on:click="clickHex"
     />

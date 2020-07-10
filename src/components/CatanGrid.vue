@@ -16,6 +16,8 @@
       :yHexCount="5"
       @hex-clicked="hexClick"
       @path-clicked="pathClick"
+      fill="blue"
+      stroke="green"
     />
   </svg>
 </template>

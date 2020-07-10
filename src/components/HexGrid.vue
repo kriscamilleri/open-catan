@@ -10,6 +10,8 @@
       :grid-size="gridSize"
       @hex-clicked="hexClick"
       @path-clicked="pathClick"
+      :stroke="stroke"
+      :fill="fill"
     ></hex-tile>
   </g>
 </template>
@@ -34,6 +36,14 @@ export default {
     yHexCount: {
       default: 5,
       type: Number,
+    },
+    stroke: {
+      default: 'transparent',
+      type: String,
+    },
+    fill: {
+      default: 'transparent',
+      type: String,
     },
   },
   data() {
