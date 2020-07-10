@@ -83,9 +83,9 @@ export default {
           && this.hexPairList[i].path.y2 === Number(hexTile.path.y1.value)
         ) {
           neighbours.push(this.hexPairList[i].id);
-          console.log(neighbours);
         }
       }
+      console.log(neighbours);
       return neighbours;
     },
   },
