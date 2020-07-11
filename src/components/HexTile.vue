@@ -8,7 +8,7 @@
       :x2="path.x2"
       :y2="path.y2"
       :stroke="path.strokeColor"
-      stroke-width="10"
+      stroke-width="20"
       class="hex-outline"
       v-on:click="clickPath"
     />
@@ -30,7 +30,7 @@ export default {
     yOffset: Number,
     gridSize: Number,
     stroke: {
-      default: 'red',
+      default: 'transparent',
       type: String,
     },
     fill: {
@@ -41,7 +41,7 @@ export default {
   data() {
     return {
       hex: {},
-      currentStroke: 'red',
+      currentStroke: 'transparent',
       currentFill: 'blue',
       offsets: [
         {

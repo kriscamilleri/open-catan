@@ -39,7 +39,6 @@ export default {
   data() {
     return {
       hexGrid: [],
-      hexes: [],
       neighboursMap: [],
       hexPairList: [],
     };
@@ -115,6 +114,8 @@ export default {
           this.hexPairList.push(item);
         }
       }
+      console.log(this.$refs.hex);
+      this.$emit('hex-created', this.$refs.hex);
     });
   },
 };
