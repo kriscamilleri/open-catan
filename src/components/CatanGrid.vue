@@ -4,8 +4,9 @@
       xmlns="http://www.w3.org/2000/svg"
       version="1.1"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      width="100%"
-      height="100%"
+      :width="width"
+      :height="height"
+      ref="svg"
     >
       <!-- <square-grid :gridSize="25" :grid-width="17" :grid-height="21" /> -->
       <hex-grid
@@ -47,20 +48,33 @@
   </div>
 </template>
 <style scoped>
-#catan-parent svg,
-#catan-parent {
-  width: 100%;
+#catan-parent svg {
+  /* height: 80vh; */
+  /* width: 100%;
   height: 100%;
   min-height: 60vh;
-  min-width: 100%;
+  min-width: 100%; */
+}
+.hud {
+  --min-hud-height: 150px;
+  --hud-height: 15vh;
+}
+
+.hud-cards {
+  /* top: calc(100vh - max(var(--min-hud-height), var(--hud-height))); */
+  margin: 0 auto;
+  flex-wrap: wrap;
+  max-width: 100vw;
+  overflow-wrap: anywhere;
 }
 .hud-card {
-  max-width: 200px;
   min-width: 100px;
-  width: 20vw;
+  min-height: 100px;
+  max-width: 15rem;
+  width: 15vw;
   margin: 0.25rem;
   border-radius: 1rem;
-  height: 200px;
+  height: 100%;
   display: flex;
   text-align: center;
 }
@@ -143,6 +157,7 @@ export default {
         yellow: 'rgba(255, 202, 40, 1)',
         orange: 'rgba(255, 112, 67, 1)',
       },
+      windowHeight: 1024,
     };
   },
   methods: {
@@ -193,6 +208,26 @@ export default {
     getRandomInt(max) {
       return Math.floor(Math.random() * Math.floor(max));
     },
+    adjustSvgScale() {
+      const ratio = this.windowHeight / this.height;
+      /* eslint-disable no-alert, no-console */
+      const translate = this.height / 2 / ratio;
+      const transform = `scale(${ratio}) translateY(${translate}px)`;
+      this.$refs.svg.style.transform = transform;
+      this.$refs.svg.style.translateY = `${(this.width / 2) * ratio}`;
+      /* eslint-enable no-alert */
+      console.log(this.$refs.svg);
+    },
+  },
+  created() {
+    this.$nextTick(function () {
+      this.adjustSvgScale();
+    });
+  },
+  mounted() {
+    window.addEventListener('resize', () => {
+      this.windowHeight = window.innerHeight;
+    });
   },
 };
 </script>
