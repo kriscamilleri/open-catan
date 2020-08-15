@@ -6,6 +6,7 @@
       xmlns:xlink="http://www.w3.org/1999/xlink"
       :width="width"
       :height="height"
+      stroke-linecap="round"
       ref="svg"
     >
       <!-- <square-grid :gridSize="25" :grid-width="17" :grid-height="21" /> -->
@@ -21,7 +22,7 @@
         @hex-created="processHexGrid"
       />
     </svg>
-    <div>
+    <div id="overlay">
       <div class="hud">
         <div class="hud-header"></div>
         <div class="hud-stat" id="ownedTiles"></div>
@@ -48,24 +49,44 @@
   </div>
 </template>
 <style scoped>
+#overlay {
+  position: absolute;
+  top: 0;
+}
+svg {
+  margin: 0 auto;
+}
+.hud {
+  display: flex;
+  flex-direction: column;
+}
+
+#catan-parent {
+  --min-hud-height: 150px;
+  --hud-height: 100vh;
+  --min-hud-width: 100px;
+  --hud-width: 15vw;
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: row;
+}
+
 #catan-parent svg {
+  transform-origin: top center; /* add this in */
+  /* margin-left: max(2.5 * var(--min-hud-width), 2.5 * var(--hud-width)); */
   /* height: 80vh; */
   /* width: 100%;
   height: 100%;
   min-height: 60vh;
   min-width: 100%; */
 }
-.hud {
-  --min-hud-height: 150px;
-  --hud-height: 15vh;
-}
-
 .hud-cards {
   /* top: calc(100vh - max(var(--min-hud-height), var(--hud-height))); */
   margin: 0 auto;
   flex-wrap: wrap;
   max-width: 100vw;
   overflow-wrap: anywhere;
+  justify-content: flex-start;
 }
 .hud-card {
   min-width: 100px;
@@ -75,8 +96,8 @@
   margin: 0.25rem;
   border-radius: 1rem;
   height: 100%;
-  display: flex;
   text-align: center;
+  align-self: baseline;
 }
 #wheat {
   border: 0.5rem var(--yellow) solid;
@@ -99,7 +120,7 @@
   height: min-content;
 }
 .hud-cards {
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
   display: flex;
 }
@@ -158,6 +179,7 @@ export default {
         orange: 'rgba(255, 112, 67, 1)',
       },
       windowHeight: 1024,
+      windowWidth: 1024,
     };
   },
   methods: {
@@ -209,24 +231,40 @@ export default {
       return Math.floor(Math.random() * Math.floor(max));
     },
     adjustSvgScale() {
-      const ratio = this.windowHeight / this.height;
-      /* eslint-disable no-alert, no-console */
-      const translate = this.height / 2 / ratio;
-      const transform = `scale(${ratio}) translateY(${translate}px)`;
-      this.$refs.svg.style.transform = transform;
-      this.$refs.svg.style.translateY = `${(this.width / 2) * ratio}`;
-      /* eslint-enable no-alert */
-      console.log(this.$refs.svg);
+      // console.log(this.windowWidth, this.windowHeight);
+      const widthHeightRatio = this.getTileWidthHeightRatio();
+      const minRatio = this.windowHeight > this.windowWidth
+        ? this.windowWidth / (this.width / widthHeightRatio)
+        : this.windowHeight / this.height;
+
+      const transform = `scale(${minRatio}) `;
+      this.setSvgScale(transform);
+    },
+    setSvgScale(transform) {
+      if (this.$refs.svg) {
+        this.$refs.svg.style.transform = transform;
+      }
+    },
+    getTileWidthHeightRatio() {
+      if (this.$refs.svg) {
+        return this.$refs.svg.clientWidth / this.$refs.svg.clientHeight;
+      }
+      return 1;
     },
   },
-  created() {
-    this.$nextTick(function () {
-      this.adjustSvgScale();
-    });
-  },
+  created() {},
   mounted() {
     window.addEventListener('resize', () => {
+      this.$nextTick(() => {
+        this.windowHeight = window.innerHeight;
+        this.windowWidth = window.innerWidth;
+        this.adjustSvgScale();
+      });
+    });
+    this.$nextTick(() => {
       this.windowHeight = window.innerHeight;
+      this.windowWidth = window.innerWidth;
+      this.adjustSvgScale();
     });
   },
 };
