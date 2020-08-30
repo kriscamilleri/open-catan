@@ -10,7 +10,10 @@
       :grid-size="gridSize"
       @hex-clicked="hexClick"
       @path-clicked="pathClick"
-    ></hex-tile>
+      @node-clicked="nodeClick"
+      @node-hovered="nodeHover"
+      @node-mouseleft="nodeMouseleave"
+></hex-tile>
   </g>
 </template>
 
@@ -66,9 +69,18 @@ export default {
     hexClick(hexTile) {
       this.$emit('hex-clicked', hexTile);
     },
+    nodeClick(hexTile) {
+      this.$emit('node-clicked', hexTile);
+    },
+    nodeHover(hexTile) {
+      this.$emit('node-hovered', hexTile);
+    },
+    nodeMouseleave(hexTile) {
+      this.$emit('node-mouseleft', hexTile);
+    },
     pathClick(hexTile) {
       const modifiedHexTile = hexTile;
-      this.findNeighbouringTiles(hexTile);
+      // this.findNeighbouringTiles(hexTile);
       this.$emit('path-clicked', modifiedHexTile);
     },
     findNeighbouringTiles(hexTile) {

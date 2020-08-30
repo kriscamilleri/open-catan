@@ -9,7 +9,8 @@
       stroke-linecap="round"
       ref="svg"
     >
-      <!-- <square-grid :gridSize="25" :grid-width="17" :grid-height="21" /> -->
+      <square-grid v-if="showSquareGrid" :gridSize="25" :grid-width="17" :grid-height="21" />
+
       <hex-grid
         :gridSize="25"
         :width="width"
@@ -18,10 +19,14 @@
         :xHexCount="5"
         :yHexCount="5"
         @hex-clicked="hexClick"
+        @node-clicked="nodeClick"
+        @node-hovered="nodeHover"
+        @node-mouseleft="nodeMouseleft"
         @path-clicked="pathClick"
         @hex-created="processHexGrid"
       />
     </svg>
+
     <div id="overlay">
       <div class="hud">
         <div class="hud-header"></div>
@@ -48,7 +53,7 @@
     </div>
   </div>
 </template>
-<style scoped>
+<style >
 #overlay {
   position: absolute;
   top: 0;
@@ -127,7 +132,7 @@ svg {
 </style>
 <script>
 import HexGrid from './HexGrid.vue';
-// import SquareGrid from './SquareGrid.vue';
+import SquareGrid from './SquareGrid.vue';
 
 export default {
   name: 'App',
@@ -143,10 +148,11 @@ export default {
   },
   components: {
     HexGrid,
-    // SquareGrid,
+    SquareGrid,
   },
   data() {
     return {
+      showSquareGrid: false,
       catanTiles: [
         2,
         3,
@@ -169,64 +175,125 @@ export default {
         24,
       ],
       hexTiles: [],
-      colors: {
-        red: 'rgba(239, 83, 80, 1)',
-        white: 'rgba(250, 250, 250, 1)',
-        brown: 'rgba(141, 110, 99, 1)',
-        grey: 'rgba(120, 144, 156, 1)',
-        green: 'rgba(102, 187, 106, 1)',
-        yellow: 'rgba(255, 202, 40, 1)',
-        orange: 'rgba(255, 112, 67, 1)',
+      myColor: {
+        name: 'blue',
+        rgba: 'rgba(82, 80, 239, 1)',
       },
+      colors: [
+        {
+          name: 'lightRed',
+          rgba: 'rgba(239, 83, 80, 0.7)',
+        }, {
+          name: 'red',
+          rgba: 'rgba(239, 83, 80, 1)',
+        }, {
+          name: 'lightWhite',
+          rgba: 'rgba(250, 250, 250, 0.7)',
+        }, {
+          name: 'white',
+          rgba: 'rgba(250, 250, 250, 1)',
+        }, {
+          name: 'lightBrown',
+          rgba: 'rgba(141, 110, 99, 0.7)',
+        }, {
+          name: 'brown',
+          rgba: 'rgba(141, 110, 99, 1)',
+        }, {
+          name: 'lightGrey',
+          rgba: 'rgba(120, 144, 156, 0.7)',
+        }, {
+          name: 'grey',
+          rgba: 'rgba(120, 144, 156, 1)',
+        }, {
+          name: 'lightGreen',
+          rgba: 'rgba(102, 187, 106, 0.7)',
+        }, {
+          name: 'green',
+          rgba: 'rgba(102, 187, 106, 1)',
+        }, {
+          name: 'lightYellow',
+          rgba: 'rgba(255, 202, 40, 0.7)',
+        }, {
+          name: 'yellow',
+          rgba: 'rgba(255, 202, 40, 1)',
+        }, {
+          name: 'lightOrange',
+          rgba: 'rgba(255, 112, 67, 0.7)',
+        }, {
+          name: 'orange',
+          rgba: 'rgba(255, 112, 67, 1)',
+        },
+      ],
       windowHeight: 1024,
       windowWidth: 1024,
     };
   },
   methods: {
     hexClick(event) {
-      event.hex.setPolygonFill('red');
+      const currentColor = event.hex.currentFill;
+      const result = this.colors.find((c) => c.rgba === currentColor);
+      const newColor = result.name.includes('light')
+        ? this.colors.find((c) => c.name === result.name.replace('light', '').toLowerCase())
+        : this.colors.find((c) => c.name.toLowerCase().includes(`light${result.name}`));
+
+      event.hex.setPolygonFill(newColor.rgba);
     },
     pathClick(event) {
-      event.hex.setPathColor('green', event.path);
+      event.hex.setPathColor(this.myColor.rgba, event.path);
+    },
+    nodeClick(event) {
+      console.log(event);
+      event.hex.setNodeFill(this.myColor.rgba, event.node);
+    },
+    nodeHover(event) {
+      console.log(event);
+      event.hex.setNodeFill(this.myColor.rgba, event.node);
+      event.hex.setNodeClass('bounce-enter-active', event.node);
+    },
+    nodeMouseleft(event) {
+      console.log(event);
+      event.hex.setNodeFill('transparent', event.node);
+      event.hex.setNodeClass('bounce-leave-active', event.node);
     },
     processHexGrid(hexTiles) {
       const self = this;
       console.log(self);
 
       for (let i = 0; i < hexTiles.length; i += 1) {
-        const random = this.getRandomInt(5);
+        const randomColor = this.getRandomInt(5);
         let color = '';
-        console.log(random);
-        switch (random) {
+        switch (randomColor) {
           case 0: {
-            color = self.colors.brown;
+            color = self.colors.find((c) => c.name === 'red');
             break;
           }
           case 1: {
-            color = self.colors.yellow;
+            color = self.colors.find((c) => c.name === 'yellow');
             break;
           }
           case 2: {
-            color = self.colors.orange;
+            color = self.colors.find((c) => c.name === 'orange');
             break;
           }
           case 3: {
-            color = self.colors.green;
+            color = self.colors.find((c) => c.name === 'green');
+            console.log(color);
             break;
           }
           case 4: {
-            color = self.colors.grey;
+            color = self.colors.find((c) => c.name === 'grey');
             break;
           }
 
           default:
             break;
         }
-        hexTiles[i].setPolygonFill(color);
+        hexTiles[i].setPolygonFill(color.rgba);
+        const randomNumber = this.getRandomInt(12) + 1;
+        hexTiles[i].setHexText(randomNumber.toString());
       }
       this.hexTiles = hexTiles;
     },
-    generateRandomMap() {},
     getRandomInt(max) {
       return Math.floor(Math.random() * Math.floor(max));
     },
@@ -250,6 +317,12 @@ export default {
         return this.$refs.svg.clientWidth / this.$refs.svg.clientHeight;
       }
       return 1;
+    },
+    toTitleCase(str) {
+      return str.replace(
+        /\w\S*/g,
+        (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+      );
     },
   },
   created() {},
