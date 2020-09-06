@@ -37,8 +37,8 @@
       @mouseover="hoverNode"
       @mouseleave="mouseleaveNode"
       :class="node.class"
-    ></circle> -->
-    <circle
+    ></circle>-->
+    <!-- <circle
       v-for="(node, key, index) in hex.nodes"
       :key="index"
       :cx="node.x"
@@ -48,7 +48,22 @@
       stroke="grey"
       stroke-width="0.5"
       v-on:click="clickNode"
-    ></circle>
+    ></circle>-->
+    <hex-node
+      v-for="(node, key, index) in hex.nodes"
+      :key="index"
+      :x="node.x"
+      :y="node.y"
+      :stroke-width="nodeStrokeWidth"
+      label="label"
+      :radius="4"
+      asdasd="asddsa"
+      stroke="gray"
+      fill="white"
+      @node-hovered="nodeHovered"
+      @node-mouseleft="nodeMouseleft"
+      @node-clicked="nodeClicked"
+    ></hex-node>
   </g>
 </template>
 <style scoped>
@@ -57,11 +72,21 @@ circle,
 line {
   filter: drop-shadow(0.15rem 0.05rem 0.15rem rgba(0, 0, 0, 0.3));
 }
+
+line {
+  cursor: pointer;
+}
 </style>
 <script>
+import HexNode from './HexNode.vue';
+
 export default {
   name: 'HexTile',
+  components: {
+    HexNode,
+  },
   props: {
+    nodeStrokeWidth: Number,
     label: String,
     xOffset: Number,
     yOffset: Number,
@@ -139,7 +164,10 @@ export default {
         const xPosition = (this.offsets[i].x * modifier + xOrigin) * this.gridSize;
         const yPosition = (this.offsets[i].y * modifier + yOrigin) * this.gridSize;
         nodes.push({
-          x: xPosition, y: yPosition, fill: this.nodeFill, class: '',
+          x: xPosition,
+          y: yPosition,
+          fill: this.nodeFill,
+          class: '',
         });
       }
 
@@ -167,11 +195,7 @@ export default {
       return paths;
     },
     generateHex(xOrigin, yOrigin, label) {
-      const polygonPath = this.generateHexPolygon(
-        xOrigin,
-        yOrigin,
-        0.8,
-      );
+      const polygonPath = this.generateHexPolygon(xOrigin, yOrigin, 0.8);
       const nodes = this.generateHexNodes(xOrigin, yOrigin, 1);
       const paths = this.generateHexPath(xOrigin, yOrigin, label);
       const hex = {
@@ -189,42 +213,6 @@ export default {
         polygon: this.hex.polygonPath,
       });
     },
-    clickNode(event) {
-      const xVal = Number(event.srcElement.getAttribute('cx'));
-      const yVal = Number(event.srcElement.getAttribute('cy'));
-      const node = {
-        x: xVal, // keep numbers only
-        y: yVal,
-      };
-      this.$emit('node-clicked', {
-        hex: this,
-        node,
-      });
-    },
-    hoverNode(event) {
-      const xVal = Number(event.srcElement.getAttribute('cx'));
-      const yVal = Number(event.srcElement.getAttribute('cy'));
-      const node = {
-        x: xVal, // keep numbers only
-        y: yVal,
-      };
-      this.$emit('node-hovered', {
-        hex: this,
-        node,
-      });
-    },
-    mouseleaveNode(event) {
-      const xVal = Number(event.srcElement.getAttribute('cx'));
-      const yVal = Number(event.srcElement.getAttribute('cy'));
-      const node = {
-        x: xVal, // keep numbers only
-        y: yVal,
-      };
-      this.$emit('node-mouseleft', {
-        hex: this,
-        node,
-      });
-    },
     clickPath(event) {
       const path = {
         x1: event.srcElement.attributes.x1,
@@ -240,17 +228,6 @@ export default {
     setPolygonFill(color) {
       this.currentFill = color;
     },
-    setNodeFill(color, node) {
-      console.log(color);
-      const nodeSvg = this.hex.nodes.find((c) => c.x === node.x && c.y === node.y);
-      nodeSvg.fill = color;
-    },
-    setNodeClass(text, node) {
-      console.log(text);
-      const nodeSvg = this.hex.nodes.find((c) => c.x === node.x && c.y === node.y);
-      nodeSvg.class = text;
-    },
-    // setPolygonForeground(color){}
     setPolygonStroke(color) {
       this.currentStroke = color;
     },
@@ -268,6 +245,17 @@ export default {
     },
     getPaths() {
       return this.hex.paths;
+    },
+    nodeHovered(node) {
+      console.log('hovered');
+      this.$emit('node-hovered', node);
+    },
+    nodeMouseleft(node) {
+      this.$emit('node-mouseleft', node);
+    },
+    nodeClicked(node) {
+      console.log(node);
+      this.$emit('node-clicked', node);
     },
   },
   created() {

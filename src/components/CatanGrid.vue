@@ -18,6 +18,7 @@
         :render-tiles="catanTiles"
         :xHexCount="5"
         :yHexCount="5"
+        :node-stroke-width="0.5"
         @hex-clicked="hexClick"
         @node-clicked="nodeClick"
         @node-hovered="nodeHover"
@@ -53,7 +54,41 @@
     </div>
   </div>
 </template>
-<style >
+<style>
+.hover-enter-node {
+  animation: floatover 0.6s cubic-bezier(0.24, 0.24, 0.21, 1.06) alternate
+    infinite;
+}
+.hover-exit-node {
+  animation: floatexit 0.6s cubic-bezier(0.24, 0.24, 0.21, 1.06) alternate 1;
+}
+@keyframes floatover {
+  0% {
+    transform: scale(1);
+    transform-origin: 50% 50%;
+    transform-box: fill-box;
+  }
+
+  100% {
+    transform: scale(2);
+    transform-origin: 50% 50%;
+    transform-box: fill-box;
+  }
+}
+
+@keyframes floatexit {
+  0% {
+    transform: scale(2);
+    transform-origin: 50% 50%;
+    transform-box: fill-box;
+  }
+
+  100% {
+    transform: scale(1);
+    transform-origin: 50% 50%;
+    transform-box: fill-box;
+  }
+}
 #overlay {
   position: absolute;
   top: 0;
@@ -65,7 +100,6 @@ svg {
   display: flex;
   flex-direction: column;
 }
-
 #catan-parent {
   --min-hud-height: 150px;
   --hud-height: 100vh;
@@ -75,7 +109,6 @@ svg {
   justify-content: flex-start;
   flex-direction: row;
 }
-
 #catan-parent svg {
   transform-origin: top center; /* add this in */
   /* margin-left: max(2.5 * var(--min-hud-width), 2.5 * var(--hud-width)); */
@@ -131,11 +164,11 @@ svg {
 }
 </style>
 <script>
-import HexGrid from './HexGrid.vue';
-import SquareGrid from './SquareGrid.vue';
+import HexGrid from "./HexGrid.vue";
+import SquareGrid from "./SquareGrid.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   props: {
     width: {
       default: 400,
@@ -176,52 +209,65 @@ export default {
       ],
       hexTiles: [],
       myColor: {
-        name: 'blue',
-        rgba: 'rgba(82, 80, 239, 1)',
+        name: "blue",
+        rgba: "rgba(82, 80, 239, 1)",
       },
       colors: [
         {
-          name: 'lightRed',
-          rgba: 'rgba(239, 83, 80, 0.7)',
-        }, {
-          name: 'red',
-          rgba: 'rgba(239, 83, 80, 1)',
-        }, {
-          name: 'lightWhite',
-          rgba: 'rgba(250, 250, 250, 0.7)',
-        }, {
-          name: 'white',
-          rgba: 'rgba(250, 250, 250, 1)',
-        }, {
-          name: 'lightBrown',
-          rgba: 'rgba(141, 110, 99, 0.7)',
-        }, {
-          name: 'brown',
-          rgba: 'rgba(141, 110, 99, 1)',
-        }, {
-          name: 'lightGrey',
-          rgba: 'rgba(120, 144, 156, 0.7)',
-        }, {
-          name: 'grey',
-          rgba: 'rgba(120, 144, 156, 1)',
-        }, {
-          name: 'lightGreen',
-          rgba: 'rgba(102, 187, 106, 0.7)',
-        }, {
-          name: 'green',
-          rgba: 'rgba(102, 187, 106, 1)',
-        }, {
-          name: 'lightYellow',
-          rgba: 'rgba(255, 202, 40, 0.7)',
-        }, {
-          name: 'yellow',
-          rgba: 'rgba(255, 202, 40, 1)',
-        }, {
-          name: 'lightOrange',
-          rgba: 'rgba(255, 112, 67, 0.7)',
-        }, {
-          name: 'orange',
-          rgba: 'rgba(255, 112, 67, 1)',
+          name: "lightRed",
+          rgba: "rgba(239, 83, 80, 0.7)",
+        },
+        {
+          name: "red",
+          rgba: "rgba(239, 83, 80, 1)",
+        },
+        {
+          name: "lightWhite",
+          rgba: "rgba(250, 250, 250, 0.7)",
+        },
+        {
+          name: "white",
+          rgba: "rgba(250, 250, 250, 1)",
+        },
+        {
+          name: "lightBrown",
+          rgba: "rgba(141, 110, 99, 0.7)",
+        },
+        {
+          name: "brown",
+          rgba: "rgba(141, 110, 99, 1)",
+        },
+        {
+          name: "lightGrey",
+          rgba: "rgba(120, 144, 156, 0.7)",
+        },
+        {
+          name: "grey",
+          rgba: "rgba(120, 144, 156, 1)",
+        },
+        {
+          name: "lightGreen",
+          rgba: "rgba(102, 187, 106, 0.7)",
+        },
+        {
+          name: "green",
+          rgba: "rgba(102, 187, 106, 1)",
+        },
+        {
+          name: "lightYellow",
+          rgba: "rgba(255, 202, 40, 0.7)",
+        },
+        {
+          name: "yellow",
+          rgba: "rgba(255, 202, 40, 1)",
+        },
+        {
+          name: "lightOrange",
+          rgba: "rgba(255, 112, 67, 0.7)",
+        },
+        {
+          name: "orange",
+          rgba: "rgba(255, 112, 67, 1)",
         },
       ],
       windowHeight: 1024,
@@ -232,9 +278,13 @@ export default {
     hexClick(event) {
       const currentColor = event.hex.currentFill;
       const result = this.colors.find((c) => c.rgba === currentColor);
-      const newColor = result.name.includes('light')
-        ? this.colors.find((c) => c.name === result.name.replace('light', '').toLowerCase())
-        : this.colors.find((c) => c.name.toLowerCase().includes(`light${result.name}`));
+      const newColor = result.name.includes("light")
+        ? this.colors.find(
+            (c) => c.name === result.name.replace("light", "").toLowerCase()
+          )
+        : this.colors.find((c) =>
+            c.name.toLowerCase().includes(`light${result.name}`)
+          );
 
       event.hex.setPolygonFill(newColor.rgba);
     },
@@ -243,17 +293,17 @@ export default {
     },
     nodeClick(event) {
       console.log(event);
-      event.hex.setNodeFill(this.myColor.rgba, event.node);
+      // event.hex.setNodeFill(this.myColor.rgba, event.node);
     },
     nodeHover(event) {
       console.log(event);
-      event.hex.setNodeFill(this.myColor.rgba, event.node);
-      event.hex.setNodeClass('bounce-enter-active', event.node);
+      // event.hex.setNodeFill(this.myColor.rgba, event.node);
+      event.hex.setNodeClass("hover-enter-node", event.node);
     },
     nodeMouseleft(event) {
       console.log(event);
-      event.hex.setNodeFill('transparent', event.node);
-      event.hex.setNodeClass('bounce-leave-active', event.node);
+      // event.hex.setNodeFill('transparent', event.node);
+      event.hex.setNodeClass("hover-exit-node", event.node);
     },
     processHexGrid(hexTiles) {
       const self = this;
@@ -261,27 +311,27 @@ export default {
 
       for (let i = 0; i < hexTiles.length; i += 1) {
         const randomColor = this.getRandomInt(5);
-        let color = '';
+        let color = "";
         switch (randomColor) {
           case 0: {
-            color = self.colors.find((c) => c.name === 'red');
+            color = self.colors.find((c) => c.name === "red");
             break;
           }
           case 1: {
-            color = self.colors.find((c) => c.name === 'yellow');
+            color = self.colors.find((c) => c.name === "yellow");
             break;
           }
           case 2: {
-            color = self.colors.find((c) => c.name === 'orange');
+            color = self.colors.find((c) => c.name === "orange");
             break;
           }
           case 3: {
-            color = self.colors.find((c) => c.name === 'green');
+            color = self.colors.find((c) => c.name === "green");
             console.log(color);
             break;
           }
           case 4: {
-            color = self.colors.find((c) => c.name === 'grey');
+            color = self.colors.find((c) => c.name === "grey");
             break;
           }
 
@@ -300,9 +350,10 @@ export default {
     adjustSvgScale() {
       // console.log(this.windowWidth, this.windowHeight);
       const widthHeightRatio = this.getTileWidthHeightRatio();
-      const minRatio = this.windowHeight > this.windowWidth
-        ? this.windowWidth / (this.width / widthHeightRatio)
-        : this.windowHeight / this.height;
+      const minRatio =
+        this.windowHeight > this.windowWidth
+          ? this.windowWidth / (this.width / widthHeightRatio)
+          : this.windowHeight / this.height;
 
       const transform = `scale(${minRatio}) `;
       this.setSvgScale(transform);
@@ -321,13 +372,13 @@ export default {
     toTitleCase(str) {
       return str.replace(
         /\w\S*/g,
-        (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+        (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
       );
     },
   },
   created() {},
   mounted() {
-    window.addEventListener('resize', () => {
+    window.addEventListener("resize", () => {
       this.$nextTick(() => {
         this.windowHeight = window.innerHeight;
         this.windowWidth = window.innerWidth;

@@ -8,12 +8,13 @@
       :y-offset="hex.yOffset"
       :label="hex.label"
       :grid-size="gridSize"
+      :node-stroke-width="nodeStrokeWidth"
       @hex-clicked="hexClick"
       @path-clicked="pathClick"
       @node-clicked="nodeClick"
       @node-hovered="nodeHover"
       @node-mouseleft="nodeMouseleave"
-></hex-tile>
+    ></hex-tile>
   </g>
 </template>
 
@@ -26,6 +27,10 @@ export default {
     HexTile,
   },
   props: {
+    nodeStrokeWidth: {
+      default: 0.4,
+      type: Number,
+    },
     gridSize: Number,
     width: Number,
     height: Number,
