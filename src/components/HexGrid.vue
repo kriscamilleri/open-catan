@@ -9,8 +9,11 @@
       :label="hex.label"
       :grid-size="gridSize"
       :node-stroke-width="nodeStrokeWidth"
+      :path-stroke-width="pathStrokeWidth"
       @hex-clicked="hexClick"
       @path-clicked="pathClick"
+      @path-hovered="pathHover"
+      @path-mouseleft="pathMouseleave"
       @node-clicked="nodeClick"
       @node-hovered="nodeHover"
       @node-mouseleft="nodeMouseleave"
@@ -29,6 +32,10 @@ export default {
   props: {
     nodeStrokeWidth: {
       default: 0.4,
+      type: Number,
+    },
+    pathStrokeWidth: {
+      default: 8,
       type: Number,
     },
     gridSize: Number,
@@ -87,6 +94,16 @@ export default {
       const modifiedHexTile = hexTile;
       // this.findNeighbouringTiles(hexTile);
       this.$emit('path-clicked', modifiedHexTile);
+    },
+    pathHover(hexTile) {
+      const modifiedHexTile = hexTile;
+      // this.findNeighbouringTiles(hexTile);
+      this.$emit('path-hovered', modifiedHexTile);
+    },
+    pathMouseleave(hexTile) {
+      const modifiedHexTile = hexTile;
+      // this.findNeighbouringTiles(hexTile);
+      this.$emit('path-mouseleft', modifiedHexTile);
     },
     findNeighbouringTiles(hexTile) {
       const neighbours = [];

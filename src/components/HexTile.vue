@@ -1,6 +1,6 @@
 <template>
   <g :data-hex-index="label">
-    <line
+    <hex-path
       v-for="path in hex.paths"
       :key="path.id"
       :x1="path.x1"
@@ -8,10 +8,11 @@
       :x2="path.x2"
       :y2="path.y2"
       :stroke="path.strokeColor"
-      stroke-width="8"
-      class="hex-outline"
-      v-on:click="clickPath"
-    />
+      :stroke-width="pathStrokeWidth"
+      @path-clicked="pathClicked"
+      @path-hovered="pathHovered"
+      @path-mouseleft="pathMouseleft"
+    ></hex-path>
     <polygon
       :points="hex.polygonPath"
       :fill="currentFill"
@@ -24,31 +25,8 @@
       fill="white"
       dominant-baseline="middle"
       text-anchor="middle"
+      v-on:click="clickHex"
     >{{hexText}}</text>
-    <!-- <circle
-      v-for="(node, key, index) in hex.nodes"
-      :key="index"
-      :cx="node.x"
-      :cy="node.y"
-      r="15"
-      fill="transparent"
-      stroke="transparent"
-      stroke-width="0.5"
-      @mouseover="hoverNode"
-      @mouseleave="mouseleaveNode"
-      :class="node.class"
-    ></circle>-->
-    <!-- <circle
-      v-for="(node, key, index) in hex.nodes"
-      :key="index"
-      :cx="node.x"
-      :cy="node.y"
-      r="1"
-      :fill="node.fill"
-      stroke="grey"
-      stroke-width="0.5"
-      v-on:click="clickNode"
-    ></circle>-->
     <hex-node
       v-for="(node, key, index) in hex.nodes"
       :key="index"
@@ -67,9 +45,14 @@
   </g>
 </template>
 <style scoped>
+text {
+  user-select: none;
+  cursor: pointer;
+}
 polygon,
 circle,
 line {
+  cursor: pointer;
   filter: drop-shadow(0.15rem 0.05rem 0.15rem rgba(0, 0, 0, 0.3));
 }
 
@@ -79,14 +62,17 @@ line {
 </style>
 <script>
 import HexNode from './HexNode.vue';
+import HexPath from './HexPath.vue';
 
 export default {
   name: 'HexTile',
   components: {
     HexNode,
+    HexPath,
   },
   props: {
     nodeStrokeWidth: Number,
+    pathStrokeWidth: Number,
     label: String,
     xOffset: Number,
     yOffset: Number,
@@ -213,32 +199,15 @@ export default {
         polygon: this.hex.polygonPath,
       });
     },
-    clickPath(event) {
-      const path = {
-        x1: event.srcElement.attributes.x1,
-        y1: event.srcElement.attributes.y1,
-        x2: event.srcElement.attributes.x2,
-        y2: event.srcElement.attributes.y2,
-      };
-      this.$emit('path-clicked', {
-        hex: this,
-        path,
-      });
-    },
+
     setPolygonFill(color) {
       this.currentFill = color;
     },
-    setPolygonStroke(color) {
-      this.currentStroke = color;
+    setPolygonStroke(stroke) {
+      this.currentStroke = stroke;
     },
-    setPathColor(color, line) {
-      const chosenPath = this.hex.paths.find(
-        (c) => c.x1 === Number(line.x1.nodeValue)
-          && c.x2 === Number(line.x2.nodeValue)
-          && c.y1 === Number(line.y1.nodeValue)
-          && c.y2 === Number(line.y2.nodeValue),
-      );
-      chosenPath.strokeColor = color;
+    setPathStroke(stroke) {
+      this.currentStroke = stroke;
     },
     setHexText(text) {
       this.hexText = text;
@@ -256,6 +225,17 @@ export default {
     nodeClicked(node) {
       console.log(node);
       this.$emit('node-clicked', node);
+    },
+    pathHovered(path) {
+      console.log('hovered');
+      this.$emit('path-hovered', path);
+    },
+    pathMouseleft(path) {
+      this.$emit('path-mouseleft', path);
+    },
+    pathClicked(path) {
+      console.log(path);
+      this.$emit('path-clicked', path);
     },
   },
   created() {

@@ -24,6 +24,8 @@
         @node-hovered="nodeHover"
         @node-mouseleft="nodeMouseleft"
         @path-clicked="pathClick"
+        @path-hovered="pathHover"
+        @path-mouseleft="pathMouseleft"
         @hex-created="processHexGrid"
       />
     </svg>
@@ -164,11 +166,11 @@ svg {
 }
 </style>
 <script>
-import HexGrid from "./HexGrid.vue";
-import SquareGrid from "./SquareGrid.vue";
+import HexGrid from './HexGrid.vue';
+import SquareGrid from './SquareGrid.vue';
 
 export default {
-  name: "App",
+  name: 'App',
   props: {
     width: {
       default: 400,
@@ -209,65 +211,65 @@ export default {
       ],
       hexTiles: [],
       myColor: {
-        name: "blue",
-        rgba: "rgba(82, 80, 239, 1)",
+        name: 'blue',
+        rgba: 'rgba(82, 80, 239, 1)',
       },
       colors: [
         {
-          name: "lightRed",
-          rgba: "rgba(239, 83, 80, 0.7)",
+          name: 'lightRed',
+          rgba: 'rgba(239, 83, 80, 0.7)',
         },
         {
-          name: "red",
-          rgba: "rgba(239, 83, 80, 1)",
+          name: 'red',
+          rgba: 'rgba(239, 83, 80, 1)',
         },
         {
-          name: "lightWhite",
-          rgba: "rgba(250, 250, 250, 0.7)",
+          name: 'lightWhite',
+          rgba: 'rgba(250, 250, 250, 0.7)',
         },
         {
-          name: "white",
-          rgba: "rgba(250, 250, 250, 1)",
+          name: 'white',
+          rgba: 'rgba(250, 250, 250, 1)',
         },
         {
-          name: "lightBrown",
-          rgba: "rgba(141, 110, 99, 0.7)",
+          name: 'lightBrown',
+          rgba: 'rgba(141, 110, 99, 0.7)',
         },
         {
-          name: "brown",
-          rgba: "rgba(141, 110, 99, 1)",
+          name: 'brown',
+          rgba: 'rgba(141, 110, 99, 1)',
         },
         {
-          name: "lightGrey",
-          rgba: "rgba(120, 144, 156, 0.7)",
+          name: 'lightGrey',
+          rgba: 'rgba(120, 144, 156, 0.7)',
         },
         {
-          name: "grey",
-          rgba: "rgba(120, 144, 156, 1)",
+          name: 'grey',
+          rgba: 'rgba(120, 144, 156, 1)',
         },
         {
-          name: "lightGreen",
-          rgba: "rgba(102, 187, 106, 0.7)",
+          name: 'lightGreen',
+          rgba: 'rgba(102, 187, 106, 0.7)',
         },
         {
-          name: "green",
-          rgba: "rgba(102, 187, 106, 1)",
+          name: 'green',
+          rgba: 'rgba(102, 187, 106, 1)',
         },
         {
-          name: "lightYellow",
-          rgba: "rgba(255, 202, 40, 0.7)",
+          name: 'lightYellow',
+          rgba: 'rgba(255, 202, 40, 0.7)',
         },
         {
-          name: "yellow",
-          rgba: "rgba(255, 202, 40, 1)",
+          name: 'yellow',
+          rgba: 'rgba(255, 202, 40, 1)',
         },
         {
-          name: "lightOrange",
-          rgba: "rgba(255, 112, 67, 0.7)",
+          name: 'lightOrange',
+          rgba: 'rgba(255, 112, 67, 0.7)',
         },
         {
-          name: "orange",
-          rgba: "rgba(255, 112, 67, 1)",
+          name: 'orange',
+          rgba: 'rgba(255, 112, 67, 1)',
         },
       ],
       windowHeight: 1024,
@@ -278,32 +280,54 @@ export default {
     hexClick(event) {
       const currentColor = event.hex.currentFill;
       const result = this.colors.find((c) => c.rgba === currentColor);
-      const newColor = result.name.includes("light")
+      const newColor = result.name.includes('light')
         ? this.colors.find(
-            (c) => c.name === result.name.replace("light", "").toLowerCase()
-          )
-        : this.colors.find((c) =>
-            c.name.toLowerCase().includes(`light${result.name}`)
-          );
+          (c) => c.name === result.name.replace('light', '').toLowerCase(),
+        )
+        : this.colors.find((c) => c.name.toLowerCase().includes(`light${result.name}`));
 
       event.hex.setPolygonFill(newColor.rgba);
     },
     pathClick(event) {
+      const thisEvent = event;
+      console.log(event);
+      console.log('path-click', event);
+      thisEvent.hex.isClicked = true;
+      event.hex.setPathWidth(8);
       event.hex.setPathColor(this.myColor.rgba, event.path);
+    },
+    pathHover(event) {
+      const thisEvent = event;
+      console.log('path-hover', event);
+      thisEvent.hex.isHovered = true;
+      if (!event.hex.isClicked) {
+        event.hex.setPathWidth(8);
+        event.hex.setPathColor('rgba(45, 55, 72, 0.2)', event.path);
+      }
+    },
+    pathMouseleft(event) {
+      console.log('path-mouseleft', event);
+      const thisEvent = event;
+      if (event.hex.isHovered && !event.hex.isClicked) {
+        thisEvent.hex.isHovered = false;
+        event.hex.setPathWidth(8);
+        event.hex.setPathColor('transparent', event.path);
+      }
     },
     nodeClick(event) {
       console.log(event);
+      event.hex.setNodeRadius(8);
       // event.hex.setNodeFill(this.myColor.rgba, event.node);
     },
     nodeHover(event) {
       console.log(event);
       // event.hex.setNodeFill(this.myColor.rgba, event.node);
-      event.hex.setNodeClass("hover-enter-node", event.node);
+      event.hex.setNodeClass('hover-enter-node', event.node);
     },
     nodeMouseleft(event) {
       console.log(event);
       // event.hex.setNodeFill('transparent', event.node);
-      event.hex.setNodeClass("hover-exit-node", event.node);
+      event.hex.setNodeClass('hover-exit-node', event.node);
     },
     processHexGrid(hexTiles) {
       const self = this;
@@ -311,27 +335,27 @@ export default {
 
       for (let i = 0; i < hexTiles.length; i += 1) {
         const randomColor = this.getRandomInt(5);
-        let color = "";
+        let color = '';
         switch (randomColor) {
           case 0: {
-            color = self.colors.find((c) => c.name === "red");
+            color = self.colors.find((c) => c.name === 'red');
             break;
           }
           case 1: {
-            color = self.colors.find((c) => c.name === "yellow");
+            color = self.colors.find((c) => c.name === 'yellow');
             break;
           }
           case 2: {
-            color = self.colors.find((c) => c.name === "orange");
+            color = self.colors.find((c) => c.name === 'orange');
             break;
           }
           case 3: {
-            color = self.colors.find((c) => c.name === "green");
+            color = self.colors.find((c) => c.name === 'green');
             console.log(color);
             break;
           }
           case 4: {
-            color = self.colors.find((c) => c.name === "grey");
+            color = self.colors.find((c) => c.name === 'grey');
             break;
           }
 
@@ -350,10 +374,9 @@ export default {
     adjustSvgScale() {
       // console.log(this.windowWidth, this.windowHeight);
       const widthHeightRatio = this.getTileWidthHeightRatio();
-      const minRatio =
-        this.windowHeight > this.windowWidth
-          ? this.windowWidth / (this.width / widthHeightRatio)
-          : this.windowHeight / this.height;
+      const minRatio = this.windowHeight > this.windowWidth
+        ? this.windowWidth / (this.width / widthHeightRatio)
+        : this.windowHeight / this.height;
 
       const transform = `scale(${minRatio}) `;
       this.setSvgScale(transform);
@@ -372,13 +395,13 @@ export default {
     toTitleCase(str) {
       return str.replace(
         /\w\S*/g,
-        (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+        (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
       );
     },
   },
   created() {},
   mounted() {
-    window.addEventListener("resize", () => {
+    window.addEventListener('resize', () => {
       this.$nextTick(() => {
         this.windowHeight = window.innerHeight;
         this.windowWidth = window.innerWidth;

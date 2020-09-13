@@ -3,7 +3,7 @@
     <circle
       :cx="x"
       :cy="y"
-      :r="radius"
+      :r="currentRadius"
       :fill="currentFill"
       :stroke="stroke"
       :stroke-width="strokeWidth"
@@ -52,6 +52,7 @@ export default {
     return {
       currentFill: String,
       nodeClass: String,
+      currentRadius: Number,
     };
   },
   methods: {
@@ -99,8 +100,12 @@ export default {
       // , node
       this.nodeClass = text;
     },
+    setNodeRadius(radius) {
+      this.currentRadius = radius;
+    },
   },
   created() {
+    this.currentRadius = this.radius;
     this.currentFill = this.fill;
   },
 };
